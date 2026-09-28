@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Table Tennis</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        body { margin: 0; background: #1e1e1e; text-align: center; color: #fff; font-family: sans-serif; overflow: hidden; }
+        canvas { background: #2e7d32; display: block; margin: 10px auto; border: 3px solid #fff; border-radius: 8px; }
+    </style>
+</head>
+<body>
+    <h3>Stol Tennisi</h3>
+    <canvas id="gameCanvas" width="360" height="480"></canvas>
+
+    <script>
+        const canvas = document.getElementById("gameCanvas");
+        const ctx = canvas.getContext("2d");
+
+        let paddleW = 80, paddleH = 12;
+        let playerX = (canvas.width - paddleW) / 2;
+        let ballX = canvas.width / 2, ballY = canvas.height / 2;
+        let ballSpeedX = 3, ballSpeedY = -3;
+        let score = 0;
+
+        canvas.addEventListener("touchmove", (e) => {
+            let rect = canvas.getBoundingClientRect();
+            let touchX = e.touches[0].clientX - rect.left;
+            playerX = touchX - paddleW / 2;
+        });
+
+        canvas.addEventListener("mousemove", (e) => {
+            let rect = canvas.getBoundingClientRect();
+            playerX = e.clientX - rect.left - paddleW / 2;
+        });
+
+        function update() {
+            ballX += ballSpeedX;
+            ballY += ballSpeedY;
+
+            if (ballX <= 0 || ballX >= canvas.width) ballSpeedX = -ballSpeedX;
+            if (ballY <= 0) ballSpeedY = -ballSpeedY;
+
+            if (ballY >= canvas.height - 25 && ballX >= playerX && ballX <= playerX + paddleW) {
+                ballSpeedY = -ballSpeedY;
+                score += 10;
+            }
+
+            if (ballY >= canvas.height) {
+                alert("O'yin tugadi! Ochko: " + score);
+                score = 0;
+                ballX = canvas.width / 2;
+                ballY = canvas.height / 2;
+            }
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Koptok
+            ctx.fillStyle = "#ffffff";
+            ctx.beginPath();
+            ctx.arc(ballX, ballY, 7, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Raketka
+            ctx.fillStyle = "#ff5722";
+            ctx.fillRect(playerX, canvas.height - 20, paddleW, paddleH);
+
+            // Ochko
+            ctx.font = "16px Arial";
+            ctx.fillText("Ochko: " + score, 15, 25);
+        }
+
+        function loop() {
+            update();
+            draw();
+            requestAnimationFrame(loop);
+        }
+
+        loop();
+    </script>
+</body>
+</html>
